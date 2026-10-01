@@ -1,5 +1,8 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const { MongoClient } = require("mongodb");
-const uri = "mongodb+srv://skills:krishna%409898@cluster0.ohrmha9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = DATABASE_URL; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 async function run() {
   try {
