@@ -29,20 +29,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Authenticate to AWS using GitHub OIDC
+      # 2. Debug GitHub OIDC
+      - name: Debug GitHub OIDC
+        uses: github/actions-oidc-debugger@main
+        with:
+          audience: sts.amazonaws.com
+
+      # 3. Authenticate to AWS using GitHub OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. Login to Amazon ECR
+  
+      # 4. Login to Amazon ECR
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region "$AWS_REGION" |
           docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-      # 4. Build backend Docker image
+      # 5. Build backend Docker image
       - name: Build backend image
         run: |
           docker build \
@@ -51,7 +58,7 @@ jobs:
             -t "$BACKEND_REPO:latest" \
             .
 
-      # 5. Build frontend Docker image
+      # 6. Build frontend Docker image
       - name: Build frontend image
         run: |
           docker build \
@@ -60,26 +67,26 @@ jobs:
             -t "$FRONTEND_REPO:latest" \
             .
 
-      # 6. Tag backend image
+      # 7. Tag backend image
       - name: Tag backend image
         run: |
           docker tag \
             "$BACKEND_REPO:latest" \
             "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      # 7. Push backend image
+      # 8. Push backend image
       - name: Push backend image
         run: |
           docker push "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      # 8. Tag frontend image
+      # 9. Tag frontend image
       - name: Tag frontend image
         run: |
           docker tag \
             "$FRONTEND_REPO:latest" \
             "$ECR_REGISTRY/$FRONTEND_REPO:latest"
 
-      # 9. Push frontend image
+      # 10. Push frontend image
       - name: Push frontend image
         run: |
           docker push "$ECR_REGISTRY/$FRONTEND_REPO:latest"
