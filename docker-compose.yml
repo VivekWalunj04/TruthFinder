@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: truth-finder-server:latest
+    container_name: truth-finder-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./server/.env
+    restart: unless-stopped
+
+  frontend:
+    image: truth-finder-client:latest
+    container_name: truth-finder-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
