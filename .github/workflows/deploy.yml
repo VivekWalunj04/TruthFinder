@@ -5,10 +5,6 @@ on:
     branches:
       - main
 
-  # pull_request:
-  #   branches:
-  #     - main
-
 env:
   AWS_REGION: ap-south-1
   ECR_REGISTRY: 582129522735.dkr.ecr.ap-south-1.amazonaws.com
@@ -17,33 +13,24 @@ env:
 
 jobs:
   build-and-push:
-    name: Build and Push Docker Images
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 3. Authenticate to AWS using GitHub OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-  
-      # 4. Login to Amazon ECR
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region "$AWS_REGION" |
           docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-      # 5. Build backend Docker image
       - name: Build backend image
         run: |
           docker build \
@@ -52,7 +39,6 @@ jobs:
             -t "$BACKEND_REPO:latest" \
             .
 
-      # 6. Build frontend Docker image
       - name: Build frontend image
         run: |
           docker build \
@@ -61,26 +47,12 @@ jobs:
             -t "$FRONTEND_REPO:latest" \
             .
 
-      # 7. Tag backend image
-      - name: Tag backend image
+      - name: Tag and push backend image
         run: |
-          docker tag \
-            "$BACKEND_REPO:latest" \
-            "$ECR_REGISTRY/$BACKEND_REPO:latest"
-
-      # 8. Push backend image
-      - name: Push backend image
-        run: |
+          docker tag "$BACKEND_REPO:latest" "$ECR_REGISTRY/$BACKEND_REPO:latest"
           docker push "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      # 9. Tag frontend image
-      - name: Tag frontend image
+      - name: Tag and push frontend image
         run: |
-          docker tag \
-            "$FRONTEND_REPO:latest" \
-            "$ECR_REGISTRY/$FRONTEND_REPO:latest"
-
-      # 10. Push frontend image
-      - name: Push frontend image
-        run: |
+          docker tag "$FRONTEND_REPO:latest" "$ECR_REGISTRY/$FRONTEND_REPO:latest"
           docker push "$ECR_REGISTRY/$FRONTEND_REPO:latest"
