@@ -12,8 +12,11 @@ env:
   FRONTEND_REPO: truth-finder-client
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -47,12 +50,43 @@ jobs:
             -t "$FRONTEND_REPO:latest" \
             .
 
-      - name: Tag and push backend image
+      - name: Push backend image
         run: |
-          docker tag "$BACKEND_REPO:latest" "$ECR_REGISTRY/$BACKEND_REPO:latest"
-          docker push "$ECR_REGISTRY/$BACKEND_REPO:latest"
+          docker tag "$BACKEND_REPO:latest" \
+            "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      - name: Tag and push frontend image
+          docker push \
+            "$ECR_REGISTRY/$BACKEND_REPO:latest"
+
+      - name: Push frontend image
         run: |
-          docker tag "$FRONTEND_REPO:latest" "$ECR_REGISTRY/$FRONTEND_REPO:latest"
-          docker push "$ECR_REGISTRY/$FRONTEND_REPO:latest"
+          docker tag "$FRONTEND_REPO:latest" \
+            "$ECR_REGISTRY/$FRONTEND_REPO:latest"
+
+          docker push \
+            "$ECR_REGISTRY/$FRONTEND_REPO:latest"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/truth-finder
+
+            aws ecr get-login-password --region ap-south-1 | \
+            docker login --username AWS --password-stdin \
+            582129522735.dkr.ecr.ap-south-1.amazonaws.com
+
+            docker pull \
+            582129522735.dkr.ecr.ap-south-1.amazonaws.com/truth-finder-server:latest
+
+            docker pull \
+            582129522735.dkr.ecr.ap-south-1.amazonaws.com/truth-finder-client:latest
+
+            docker-compose up -d
+
+            docker image prune -f
+
+            docker-compose ps
