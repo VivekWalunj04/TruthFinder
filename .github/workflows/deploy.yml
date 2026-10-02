@@ -25,11 +25,11 @@ jobs:
       contents: read
 
     steps:
-      # 1. Get the source code
+      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configure AWS using GitHub OIDC
+      # 2. Authenticate to AWS using GitHub OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -60,26 +60,26 @@ jobs:
             -t "$FRONTEND_REPO:latest" \
             .
 
-      # 6. Tag backend image for ECR
+      # 6. Tag backend image
       - name: Tag backend image
         run: |
           docker tag \
             "$BACKEND_REPO:latest" \
             "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      # 7. Push backend image to ECR
+      # 7. Push backend image
       - name: Push backend image
         run: |
           docker push "$ECR_REGISTRY/$BACKEND_REPO:latest"
 
-      # 8. Tag frontend image for ECR
+      # 8. Tag frontend image
       - name: Tag frontend image
         run: |
           docker tag \
             "$FRONTEND_REPO:latest" \
             "$ECR_REGISTRY/$FRONTEND_REPO:latest"
 
-      # 9. Push frontend image to ECR
+      # 9. Push frontend image
       - name: Push frontend image
         run: |
           docker push "$ECR_REGISTRY/$FRONTEND_REPO:latest"
