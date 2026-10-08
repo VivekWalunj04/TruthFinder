@@ -10,7 +10,7 @@ const steps = [
   { num: "02", title: "Dynamic Assessment",   desc: "Take an AI-generated test tailored precisely to your claimed skills.",    dotClass: "bg-blue-500"   },
   { num: "03", title: "Truth Scoring",        desc: "Receive verified 'Truth Scores' for each skill — trusted by recruiters.", dotClass: "bg-emerald-500"},
   { num: "04", title: "Comparison",           desc: "Recruiters compare verified profiles instantly, ensuring skills-based hiring.", dotClass: "bg-amber-500" },
-  { num: "05", title: "Get Hired",            desc: "Skip the phone screen and go straight to final round interviews.",         dotClass: "bg-rose-500"   },
+  { num: "05", title: "Get fired",            desc: "Skip the phone screen and go straight to final round interviews.",         dotClass: "bg-rose-500"   },
 ];
 
 const stats = [
